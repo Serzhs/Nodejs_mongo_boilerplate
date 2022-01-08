@@ -1,33 +1,24 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+
+import { blogRouter } from './src/routes/blog';
 
 const app = express();
-const port = 3000;
 
-async function main() {
-  await mongoose.connect('mongodb://root:example@mongo:27017', { dbName: 'blog' });
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
-  const kittySchema = new mongoose.Schema({
-    name: String,
-  });
+app.use(cors({
+  origin: '*',
+}));
 
-  const Kitten = mongoose.model('Kitten', kittySchema);
+mongoose.connect('mongodb://root:example@mongo:27017', { dbName: 'blog' });
 
-  const fluffy = new Kitten({ name: 'fluffy' });
+app.use('/blog', blogRouter);
 
-  await fluffy.save();
-}
-
-main().catch(err => console.log(err));
-
-app.get('/', async (req, res) => {
-  res.send('Hello World!');
-});
-
-app.get('/aa', (req, res) => {
-  res.send('aaaa');
-});
-
-app.listen(port, () => {
-  console.log(`Timezones by location application is running on port ${port}.`);
+app.listen(3000, () => {
+  console.log('Blog Running on port 3000.');
 });
